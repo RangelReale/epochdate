@@ -116,3 +116,45 @@ func TestUnix(t *testing.T) {
 		t.Error("Expected Date(1).UnixNano() to return", dayInNanosecs, "but got", ns)
 	}
 }
+
+func TestEquals(t *testing.T) {
+	t1 := time.Date(2013, 7, 25, 10, 51, 13, 0, time.Local)
+	t2 := time.Date(2013, 7, 26, 10, 51, 13, 0, time.Local)
+	d, err := NewFromDate(2013, 7, 25)
+	if err != nil {
+		t.Error("Date creation error: ", err.Error())
+	}
+
+	if !d.EqualsTime(t1) {
+		t.Error("Date ", d.String(), " and time ", t1.String(), " should be equals")
+	}
+	if d.EqualsTime(t2) {
+		t.Error("Date ", d.String(), " and time ", t2.String(), " should not be equals")
+	}
+}
+
+func TestAfterBefore(t *testing.T) {
+	t1 := time.Date(2013, 7, 25, 10, 51, 13, 0, time.Local)
+	t2 := time.Date(2013, 7, 26, 10, 51, 13, 0, time.Local)
+	t3 := time.Date(2013, 7, 24, 10, 51, 13, 0, time.Local)
+	d, err := NewFromDate(2013, 7, 25)
+	if err != nil {
+		t.Error("Date creation error: ", err.Error())
+	}
+
+	if d.AfterTime(t1) || d.BeforeTime(t1) {
+		t.Error("Date ", d.String(), " and time ", t1.String(), " should be equals, not before or after")
+	}
+	if !d.AfterTime(t3) {
+		t.Error("Date ", d.String(), " and time ", t3.String(), " should be after")
+	}
+	if d.AfterTime(t2) {
+		t.Error("Date ", d.String(), " and time ", t2.String(), " should be after")
+	}
+	if d.BeforeTime(t3) {
+		t.Error("Date ", d.String(), " and time ", t3.String(), " should be before")
+	}
+	if !d.BeforeTime(t2) {
+		t.Error("Date ", d.String(), " and time ", t2.String(), " should be before")
+	}
+}

@@ -25,6 +25,7 @@ epochdate truncates time-of-day information.
 package epochdate
 
 import (
+	"database/sql/driver"
 	"errors"
 	"time"
 )
@@ -155,6 +156,47 @@ func (d Date) In(loc *time.Location) time.Time {
 	return t.Add(time.Duration(-offset) * time.Second)
 }
 
+// Returns whether the dates are equals
+func (d Date) Equals(date Date) bool {
+	return d == date
+}
+
+// Returns whether the date is into the time (between 00:00:00 and 23:59:59)
+func (d Date) EqualsTime(t time.Time) bool {
+	dtz := d.In(t.Location())
+	return t.After(dtz) && t.Before(dtz.Add(time.Hour*24-time.Second))
+}
+
+// Returns whether the date d is after date
+func (d Date) After(date Date) bool {
+	return d > date
+}
+
+// Returns whether the date d is after t
+func (d Date) AfterTime(t time.Time) bool {
+	// check if equals
+	if d.EqualsTime(t) {
+		return false
+	}
+	dtz := d.In(t.Location())
+	return t.Before(dtz)
+}
+
+// Returns whether the date d is before date
+func (d Date) Before(date Date) bool {
+	return d < date
+}
+
+// Returns whether the date d is before t
+func (d Date) BeforeTime(t time.Time) bool {
+	// check if equals
+	if d.EqualsTime(t) {
+		return false
+	}
+	dtz := d.In(t.Location())
+	return t.After(dtz.Add(time.Hour*24 - time.Second))
+}
+
 func (d Date) MarshalJSON() ([]byte, error) {
 	return []byte(d.Format(`"` + RFC3339 + `"`)), nil
 }
@@ -162,4 +204,25 @@ func (d Date) MarshalJSON() ([]byte, error) {
 func (d *Date) UnmarshalJSON(data []byte) (err error) {
 	*d, err = Parse(`"`+RFC3339+`"`, string(data))
 	return
+}
+
+// Scan implements the Scanner interface.
+func (d *Date) Scan(value interface{}) error {
+	// cast to time
+	time, ok := value.(time.Time)
+	if !ok {
+		return errors.New("Only time.Time is supported")
+	}
+	// convert to date
+	nd, err := NewFromTime(time)
+	if err != nil {
+		return err
+	}
+	*d = nd
+	return nil
+}
+
+// Value implements the driver Valuer interface.
+func (d Date) Value() (driver.Value, error) {
+	return d.UTC(), nil
 }
