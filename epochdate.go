@@ -144,6 +144,12 @@ func (d Date) UTC() time.Time {
 	return time.Unix(int64(d)*day, 0).UTC()
 }
 
+// UTC returns a UTC Time object set to 00:00:00 on the given date.
+func (d Date) UTCTime(hour int, min int, sec int, nsec int) time.Time {
+	t := d.UTC()
+	return time.Date(t.Year(), t.Month(), t.Day(), hour, min, sec, nsec, time.UTC)
+}
+
 // Local returns a local Time object set to 00:00:00 on the given date.
 func (d Date) Local() time.Time {
 	return d.In(time.Local)
