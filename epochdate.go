@@ -139,6 +139,13 @@ func (d Date) Date() (year int, month time.Month, day int) {
 	return d.UTC().Date()
 }
 
+// AddDate is semantically identical to the behavior of t.AddDate(), where t is a
+// time.Time value.
+func (d Date) AddDate(years int, months int, days int) Date {
+	r, _ := NewFromUnix(d.UTC().AddDate(years, months, days).Unix())
+	return r
+}
+
 // UTC returns a UTC Time object set to 00:00:00 on the given date.
 func (d Date) UTC() time.Time {
 	return time.Unix(int64(d)*day, 0).UTC()
