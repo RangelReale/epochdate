@@ -232,3 +232,9 @@ func (d *Date) Scan(value interface{}) error {
 func (d Date) Value() (driver.Value, error) {
 	return d.UTC(), nil
 }
+
+// Calculate WeekDay
+func (d Date) Weekday() time.Weekday {
+	// Absolute date is 1970-01-01, Thursday
+	return time.Weekday((uint16(d) + uint16(time.Thursday)) % 7)
+}
